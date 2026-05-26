@@ -33,8 +33,8 @@ docker compose up -d --build
 
 | Port | Service | URL |
 |---|---|---|
-| `80` | Nginx (reverse proxy) | http://localhost |
-| `3000` | Next.js (direct) | http://localhost:3000 |
+| `88` | Nginx (reverse proxy) | http://localhost:88 |
+| `3003` | Next.js (direct) | http://localhost:3003 |
 | `8000` | FastAPI (direct) | http://localhost:8000 |
 | `5434` | PostgreSQL (host) | `localhost:5434` |
 

@@ -23,7 +23,7 @@ export default function HomePage() {
   return (
     <div data-testid="home-page">
       <div className="text-center mb-10">
-        <h1 className="text-4xl font-bold text-gray-dark">Welcome to Mock Store</h1>
+        <h1 className="text-4xl font-bold text-gray-dark">Welcome to MockyShop</h1>
         <p className="mt-3 text-lg text-gray-txt">Browse products, add to cart, and place orders.</p>
         <div className="mt-6 flex justify-center gap-4">
           <Link href="/products">

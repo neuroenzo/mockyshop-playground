@@ -13,7 +13,7 @@ export function Navbar() {
         <div className="flex h-16 justify-between items-center">
           <div className="flex items-center gap-8">
             <Link href="/" className="text-xl font-bold text-white" data-testid="nav-home">
-              Mock Store
+              MockyShop
             </Link>
             <div className="hidden sm:flex gap-6">
               <Link href="/products" className="text-sm font-medium text-white hover:text-primary" data-testid="nav-products">

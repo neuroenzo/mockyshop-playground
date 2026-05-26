@@ -3,7 +3,7 @@ import "./globals.css";
 import { ClientLayout } from "./client-layout";
 
 export const metadata: Metadata = {
-  title: "Mock Store",
+  title: "MockyShop",
   description: "Online store demo project",
 };
 
