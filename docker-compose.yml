@@ -54,7 +54,7 @@ services:
   nginx:
     image: nginx:alpine
     ports:
-      - "88:80"
+      - "98:80"
     volumes:
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
       - static_data:/app/static:ro
