@@ -1,0 +1,52 @@
+@import "tailwindcss";
+@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&display=swap");
+
+@theme {
+  --color-primary: #ff0042;
+  --color-primary-hover: #cc0035;
+  --color-primary-light: #ffebf0;
+  --color-white: #ffffff;
+  --color-black: #010717;
+  --color-gray-lighter: #FAF7F3;
+  --color-gray-light: #323232;
+  --color-gray-dark: #010717;
+  --color-gray-txt: #4c4d56;
+  --color-gray-line: #E5E5E5;
+
+  --font-display: "Manrope", sans-serif;
+  --font-sans: "Manrope", sans-serif;
+
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+
+  --container-padding: 1rem;
+}
+
+* {
+  font-family: "Manrope", sans-serif;
+}
+
+button:hover {
+  cursor: pointer;
+}
+
+@keyframes scaleUp {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.2); }
+}
+
+@keyframes slideDown {
+  0% { transform: translateY(-20px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+.search-slide-down {
+  animation: slideDown 0.3s forwards;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}

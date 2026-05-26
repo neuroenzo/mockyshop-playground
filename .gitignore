@@ -1,0 +1,52 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Virtual environment
+.venv/
+venv/
+env/
+
+# Environment files with secrets
+.env
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Ruff cache
+.ruff_cache/
+
+# Database files (SQLite leftovers)
+*.db
+*.sqlite
+*.sqlite3
+
+# Uploaded files (dynamic content)
+backend/static/uploads/products/*
+!backend/static/uploads/products/.gitkeep
+
+# Test artifacts
+.pytest_cache/
+htmlcov/
+.coverage
+coverage/
+
+# Node
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
