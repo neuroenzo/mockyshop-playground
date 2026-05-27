@@ -38,4 +38,4 @@ async def root():
     Root route confirming that the API is running.
     """
 
-    return {"message": "Welcome to the online store API!"}
+    return {"message": "Welcome to the MockyShop API!"}
