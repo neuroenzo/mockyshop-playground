@@ -37,17 +37,16 @@ class CartService:
         }
 
     async def get_cart(self, user_id: int) -> CartResponse:
+        cart = await self._get_or_create_cart(user_id)
         result = await self.db.scalars(
             select(CartModel)
             .options(joinedload(CartModel.items).joinedload(CartItemModel.product))
-            .where(CartModel.user_id == user_id)
+            .where(CartModel.id == cart.id)
         )
         cart = result.unique().first()
+
         if not cart:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Cart not found",
-            )
+            return CartResponse(id=0, items=[], total_amount=Decimal("0.00"), total_items=0)
 
         items = [
             CartItemResponse(

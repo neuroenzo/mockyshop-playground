@@ -33,12 +33,6 @@ env/
 backend/static/uploads/products/*
 !backend/static/uploads/products/.gitkeep
 
-# Test artifacts
-.pytest_cache/
-htmlcov/
-.coverage
-coverage/
-
 # Node
 frontend/node_modules/
 frontend/.next/

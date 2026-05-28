@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.auth import get_current_admin_user
+from app.auth import get_current_admin_user, get_current_user
 from app.db_depends import get_async_db
 from app.models.users import User as UserModel
 from app.schemas import User as UserSchema
@@ -39,6 +39,18 @@ async def get_all_users(
     service = UserService(db)
 
     return await service.get_all_users(filter)
+
+
+@router.get("/current_user", response_model=UserSchema)
+async def get_current_user_profile(
+    db: AsyncSession = Depends(get_async_db),
+    current_user: UserModel = Depends(get_current_user),
+):
+    """
+    Returns the current authenticated user's profile. Accessible by all roles.
+    """
+
+    return current_user
 
 
 @router.post("/token")

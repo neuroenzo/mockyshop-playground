@@ -31,7 +31,7 @@ export default function LoginPage() {
 
   return (
     <div data-testid="login-page" className="max-w-md mx-auto mt-12">
-      <h1 className="text-2xl font-bold text-center mb-6">Sign In</h1>
+      <h1 className="text-2xl font-bold text-center mb-6">Welcome to MockyShop</h1>
       <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-sm border border-gray-line p-6 space-y-4">
         {error && <ErrorMessage message={error} />}
         <Input
@@ -53,7 +53,7 @@ export default function LoginPage() {
           placeholder="Enter your password"
         />
         <Button type="submit" loading={loading} className="w-full" testId="btn-login-submit">
-          Sign In
+          Log In
         </Button>
       </form>
     </div>
