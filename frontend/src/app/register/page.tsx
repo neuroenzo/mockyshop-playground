@@ -65,7 +65,7 @@ export default function RegisterPage() {
           ]}
         />
         <Button type="submit" loading={loading} className="w-full" testId="btn-register-submit">
-          Create Account
+          Register
         </Button>
       </form>
     </div>

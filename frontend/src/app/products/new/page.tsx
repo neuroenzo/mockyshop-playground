@@ -6,6 +6,7 @@ import type { ProductCreate } from "@/types/api";
 import { useAuth } from "@/contexts/AuthContext";
 import { AuthGuard } from "@/components/layout/AuthGuard";
 import { ProductForm } from "@/components/products/ProductForm";
+import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { useState, useCallback } from "react";
 
 function NewProductPage() {
@@ -34,6 +35,11 @@ function NewProductPage() {
 
   return (
     <div data-testid="product-new-page">
+      <Breadcrumbs items={[
+        { label: "Home", href: "/" },
+        { label: "Products", href: "/products" },
+        { label: "New Product" },
+      ]} />
       <h1 className="text-2xl font-bold mb-6">New Product</h1>
       <ProductForm onSave={handleSave} saving={saving} onFilesSelect={handleFilesSelect} />
     </div>

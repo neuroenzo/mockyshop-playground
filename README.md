@@ -1,6 +1,6 @@
 # MockyShop
 
-E2E and API test automation playground.
+Full-stack e-commerce demo application.
 
 Full-stack e-commerce demo: Next.js 16 (App Router) + FastAPI + PostgreSQL + Docker.
 

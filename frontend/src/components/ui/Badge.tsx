@@ -4,6 +4,8 @@ const colors: Record<string, string> = {
   shipped: "bg-purple-100 text-purple-800",
   delivered: "bg-green-100 text-green-800",
   cancelled: "bg-red-100 text-red-800",
+  active: "bg-green-100 text-green-800",
+  inactive: "bg-gray-200 text-gray-600",
 };
 
 export function Badge({

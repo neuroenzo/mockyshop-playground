@@ -28,5 +28,5 @@ export function register(data: UserCreate): Promise<User> {
 }
 
 export function getMyProfile(): Promise<User> {
-  return apiFetch<User>("/admin/main");
+  return apiFetch<User>("/users/current_user");
 }

@@ -7,10 +7,10 @@ from app.models.users import User as UserModel
 from app.schemas import CheckoutResponse, PaymentCreate, PaymentResponse
 from app.services.payment import PaymentService
 
-router = APIRouter(prefix="/orders", tags=["orders"])
+router = APIRouter(prefix="/checkout", tags=["payments"])
 
 
-@router.get("/{order_id}/checkout", response_model=CheckoutResponse)
+@router.get("/{order_id}", response_model=CheckoutResponse)
 async def get_checkout(
     order_id: int,
     current_user: UserModel = Depends(get_current_buyer),

@@ -4,9 +4,10 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { getProducts } from "@/lib/queries/products";
 import type { Product } from "@/types/api";
-import { Spinner } from "@/components/ui/Spinner";
 import { ErrorMessage } from "@/components/ui/ErrorMessage";
 import { Button } from "@/components/ui/Button";
+import { ProductCardSkeleton } from "@/components/ui/Skeleton";
+import { ProductImagePlaceholder } from "@/components/ui/ProductImagePlaceholder";
 
 export default function HomePage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -22,21 +23,33 @@ export default function HomePage() {
 
   return (
     <div data-testid="home-page">
-      <div className="text-center mb-10">
-        <h1 className="text-4xl font-bold text-gray-dark">Welcome to MockyShop</h1>
-        <p className="mt-3 text-lg text-gray-txt">Browse products, add to cart, and place orders.</p>
-        <div className="mt-6 flex justify-center gap-4">
-          <Link href="/products">
-            <Button size="lg">Browse Products</Button>
-          </Link>
-          <Link href="/register">
-            <Button variant="secondary" size="lg">Create Account</Button>
-          </Link>
+      <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-primary to-primary-hover text-white mb-12 px-8 py-12 sm:px-12 sm:py-16">
+        <div className="relative z-10">
+          <h1 className="text-4xl sm:text-5xl font-bold">Welcome to MockyShop</h1>
+          <p className="mt-3 text-lg text-white/80 max-w-xl">
+            Browse products, add to cart, and place orders — your one-stop mock shop.
+          </p>
+          <div className="mt-8 flex flex-wrap gap-4">
+            <Link href="/products">
+              <Button size="lg" className="bg-gray-lighter text-primary">
+                Browse Products
+              </Button>
+            </Link>
+          </div>
         </div>
+        <div className="absolute -bottom-6 -right-6 h-48 w-48 rounded-full bg-white/10 sm:h-64 sm:w-64" />
+        <div className="absolute -top-8 -right-8 h-24 w-24 rounded-full bg-white/10" />
       </div>
 
-      {loading && <Spinner />}
       {error && <ErrorMessage message={error} />}
+
+      {loading && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <ProductCardSkeleton key={i} />
+          ))}
+        </div>
+      )}
 
       {!loading && !error && products.length === 0 && (
         <p className="text-center text-gray-txt">No products yet.</p>
@@ -48,12 +61,12 @@ export default function HomePage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {products.map((p) => (
               <Link key={p.id} href={`/products/${p.id}`} data-testid={`product-card-${p.id}`}>
-                <div className="bg-white rounded-lg shadow-sm border border-gray-line hover:shadow-md transition-shadow">
-                  <div className="h-40 bg-gray-lighter rounded-t-lg flex items-center justify-center text-gray-line text-sm">
+                <div className="bg-white rounded-lg shadow-sm border border-gray-line hover:shadow-md transition-shadow group h-full">
+                  <div className="h-40 bg-gray-lighter rounded-t-lg overflow-hidden">
                     {p.image_url ? (
-                      <img src={p.image_url} alt={p.name} className="h-full w-full object-cover rounded-t-lg" />
+                      <img src={p.image_url} alt={p.name} className="h-full w-full object-cover rounded-t-lg group-hover:scale-105 transition-transform" />
                     ) : (
-                      "No image"
+                      <ProductImagePlaceholder />
                     )}
                   </div>
                   <div className="p-4">

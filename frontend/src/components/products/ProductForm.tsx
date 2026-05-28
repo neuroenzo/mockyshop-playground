@@ -25,7 +25,7 @@ export function ProductForm({ initial, onSave, saving, onFilesSelect, existingIm
   const [stock, setStock] = useState(initial?.stock?.toString() ?? "0");
   const [categoryId, setCategoryId] = useState(initial?.category_id?.toString() ?? "");
   const [error, setError] = useState<string | null>(null);
-  const [fileNames, setFileNames] = useState<string[]>([]);
+  const [filePreviews, setFilePreviews] = useState<string[]>([]);
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -35,10 +35,20 @@ export function ProductForm({ initial, onSave, saving, onFilesSelect, existingIm
   const handleFileChange = () => {
     const files = fileRef.current?.files;
     if (files && files.length > 0) {
-      setFileNames(Array.from(files).map((f) => f.name));
+      const previews: string[] = [];
+      Array.from(files).forEach((f) => {
+        previews.push(URL.createObjectURL(f));
+      });
+      setFilePreviews(previews);
       onFilesSelect?.(files);
     }
   };
+
+  useEffect(() => {
+    return () => {
+      filePreviews.forEach((url) => URL.revokeObjectURL(url));
+    };
+  }, [filePreviews]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -91,7 +101,7 @@ export function ProductForm({ initial, onSave, saving, onFilesSelect, existingIm
         {existingImages && existingImages.length > 0 && (
           <div className="flex gap-2 flex-wrap mb-2">
             {existingImages.map((img) => (
-              <div key={img.id} className="relative group">
+              <div key={img.id} className="relative">
                 <img
                   src={img.image_url}
                   alt={img.original_filename ?? ""}
@@ -102,7 +112,7 @@ export function ProductForm({ initial, onSave, saving, onFilesSelect, existingIm
                   <button
                     type="button"
                     onClick={() => onDeleteImage(img.id)}
-                    className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 text-white rounded-full text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                    className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 text-white rounded-full text-xs flex items-center justify-center hover:scale-110 transition-transform"
                     data-testid={`btn-delete-image-${img.id}`}
                     aria-label={`Delete ${img.original_filename ?? "image"}`}
                   >
@@ -124,10 +134,36 @@ export function ProductForm({ initial, onSave, saving, onFilesSelect, existingIm
           className="block w-full text-sm text-gray-txt file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-primary-light file:text-primary hover:file:bg-[#ffd6e0]"
           data-testid="input-product-images"
         />
-        {fileNames.length > 0 && (
-          <ul className="text-xs text-gray-txt list-disc list-inside">
-            {fileNames.map((fn) => <li key={fn}>{fn}</li>)}
-          </ul>
+        {filePreviews.length > 0 && (
+          <div className="flex gap-2 flex-wrap mt-2">
+            {filePreviews.map((url, idx) => (
+              <div key={idx} className="relative">
+                <img
+                  src={url}
+                  alt={`Preview ${idx + 1}`}
+                  className="w-16 h-16 rounded border border-gray-line object-cover"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    setFilePreviews((prev) => prev.filter((_, i) => i !== idx));
+                    const dt = new DataTransfer();
+                    const files = fileRef.current?.files;
+                    if (files) {
+                      Array.from(files).forEach((f, i) => {
+                        if (i !== idx) dt.items.add(f);
+                      });
+                      if (fileRef.current) fileRef.current.files = dt.files;
+                    }
+                  }}
+                  className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 text-white rounded-full text-xs flex items-center justify-center hover:scale-110 transition-transform"
+                  aria-label="Remove image"
+                >
+                  ×
+                </button>
+              </div>
+            ))}
+          </div>
         )}
       </div>
       <Button type="submit" loading={saving} testId="btn-product-save">

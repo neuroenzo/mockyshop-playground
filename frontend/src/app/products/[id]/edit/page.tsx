@@ -7,8 +7,9 @@ import type { Product, ProductCreate, ProductImage } from "@/types/api";
 import { useAuth } from "@/contexts/AuthContext";
 import { AuthGuard } from "@/components/layout/AuthGuard";
 import { ProductForm } from "@/components/products/ProductForm";
-import { Spinner } from "@/components/ui/Spinner";
 import { ErrorMessage } from "@/components/ui/ErrorMessage";
+import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
+import { ProductDetailSkeleton } from "@/components/ui/Skeleton";
 
 function EditProductPage() {
   const { id } = useParams<{ id: string }>();
@@ -60,12 +61,18 @@ function EditProductPage() {
     }
   };
 
-  if (loading) return <Spinner />;
+  if (loading) return <ProductDetailSkeleton />;
   if (error) return <ErrorMessage message={error} />;
   if (!product) return <ErrorMessage message="Product not found" />;
 
   return (
     <div data-testid="product-edit-page">
+      <Breadcrumbs items={[
+        { label: "Home", href: "/" },
+        { label: "Products", href: "/products" },
+        { label: product.name, href: `/products/${product.id}` },
+        { label: "Edit" },
+      ]} />
       <h1 className="text-2xl font-bold mb-6">Edit Product</h1>
       <ProductForm initial={product} onSave={handleSave} saving={saving} onFilesSelect={handleFilesSelect} existingImages={images} onDeleteImage={handleDeleteImage} />
     </div>

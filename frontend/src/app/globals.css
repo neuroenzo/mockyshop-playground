@@ -1,5 +1,5 @@
-@import "tailwindcss";
 @import url("https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&display=swap");
+@import "tailwindcss";
 
 @theme {
   --color-primary: #ff0042;
@@ -12,6 +12,9 @@
   --color-gray-dark: #010717;
   --color-gray-txt: #4c4d56;
   --color-gray-line: #E5E5E5;
+  --color-success: #16a34a;
+  --color-warning: #d97706;
+  --color-error: #dc2626;
 
   --font-display: "Manrope", sans-serif;
   --font-sans: "Manrope", sans-serif;
@@ -49,4 +52,9 @@ button:hover {
 img {
   max-width: 100%;
   height: auto;
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  opacity: 1;
 }

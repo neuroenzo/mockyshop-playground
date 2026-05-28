@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import { getUsers, createUser, updateUserRole, makeAdmin, removeAdmin, deleteUser } from "@/lib/queries/users";
 import type { User, UserAdminCreate, UserFilter } from "@/types/api";
 import { AuthGuard } from "@/components/layout/AuthGuard";
-import { Spinner } from "@/components/ui/Spinner";
+import { useToast } from "@/contexts/ToastContext";
 import { ErrorMessage } from "@/components/ui/ErrorMessage";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Pagination } from "@/components/ui/Pagination";
@@ -12,6 +12,9 @@ import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
+import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
+import { ConfirmationModal } from "@/components/ui/ConfirmationModal";
+import { TableSkeleton } from "@/components/ui/Skeleton";
 
 const ROLE_OPTIONS = [
   { value: "buyer", label: "Buyer" },
@@ -20,6 +23,7 @@ const ROLE_OPTIONS = [
 ];
 
 function AdminUsersPage() {
+  const { toast } = useToast();
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -120,18 +124,51 @@ function AdminUsersPage() {
     }
   };
 
-  const handleDelete = async (userId: number) => {
-    if (!confirm("Deactivate this user?")) return;
+  const [deleteTarget, setDeleteTarget] = useState<number | null>(null);
+
+  const handleDelete = async () => {
+    if (deleteTarget === null) return;
     try {
-      await deleteUser(userId);
+      await deleteUser(deleteTarget);
+      toast("User deactivated", "success");
       fetchUsers();
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to delete user");
+      toast(err instanceof Error ? err.message : "Failed to delete user", "error");
+    } finally {
+      setDeleteTarget(null);
+    }
+  };
+
+  const [confirmToggleAdmin, setConfirmToggleAdmin] = useState<User | null>(null);
+
+  const handleToggleAdminWrapped = async () => {
+    if (!confirmToggleAdmin) return;
+    setActionLoading(confirmToggleAdmin.id);
+    try {
+      if (confirmToggleAdmin.role === "admin") {
+        await removeAdmin(confirmToggleAdmin.id);
+        toast("Admin role removed", "success");
+      } else {
+        await makeAdmin(confirmToggleAdmin.id);
+        toast("User promoted to admin", "success");
+      }
+      fetchUsers();
+    } catch (err: unknown) {
+      toast(err instanceof Error ? err.message : "Failed to toggle admin", "error");
+    } finally {
+      setActionLoading(null);
+      setConfirmToggleAdmin(null);
     }
   };
 
   return (
     <div data-testid="admin-users-page">
+      <Breadcrumbs items={[
+        { label: "Home", href: "/" },
+        { label: "Admin" },
+        { label: "Users" },
+      ]} />
+
       <h1 className="text-2xl font-bold mb-6">User Management</h1>
 
       <form onSubmit={handleCreate} className="bg-white rounded-lg shadow-sm border border-gray-line p-4 mb-6 flex flex-wrap gap-4 items-end max-w-2xl">
@@ -178,7 +215,7 @@ function AdminUsersPage() {
         />
       </div>
 
-      {loading && <Spinner />}
+      {loading && <TableSkeleton rows={5} />}
       {error && <ErrorMessage message={error} onRetry={fetchUsers} />}
 
       {!loading && !error && users.length === 0 && (
@@ -204,7 +241,7 @@ function AdminUsersPage() {
                   <td className="px-6 py-4 text-sm text-gray-txt">{u.id}</td>
                   <td className="px-6 py-4 text-sm text-gray-dark">{u.email}</td>
                   <td className="px-6 py-4"><Badge variant={u.role}>{u.role}</Badge></td>
-                  <td className="px-6 py-4"><Badge variant={u.is_active ? "delivered" : "cancelled"}>{u.is_active ? "Yes" : "No"}</Badge></td>
+                  <td className="px-6 py-4"><Badge variant={u.is_active ? "active" : "inactive"}>{u.is_active ? "Yes" : "No"}</Badge></td>
                   <td className="px-6 py-4">
                     <select
                       value={u.role}
@@ -238,7 +275,7 @@ function AdminUsersPage() {
                         data-testid={`actions-menu-${u.id}`}
                       >
                         <button
-                          onClick={() => { setOpenMenuId(null); setMenuPos(null); handleToggleAdmin(u); }}
+                          onClick={() => { setOpenMenuId(null); setMenuPos(null); setConfirmToggleAdmin(u); }}
                           disabled={actionLoading === u.id}
                           className="block w-full text-left px-4 py-2 text-sm text-gray-txt hover:bg-gray-lighter disabled:opacity-50"
                           data-testid={`user-toggle-admin-${u.id}`}
@@ -246,7 +283,7 @@ function AdminUsersPage() {
                           {u.role === "admin" ? "Remove Admin" : "Make Admin"}
                         </button>
                         <button
-                          onClick={() => { setOpenMenuId(null); setMenuPos(null); handleDelete(u.id); }}
+                          onClick={() => { setOpenMenuId(null); setMenuPos(null); setDeleteTarget(u.id); }}
                           disabled={!u.is_active || actionLoading === u.id}
                           className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-lighter disabled:opacity-50"
                           data-testid={`btn-delete-user-${u.id}`}
@@ -263,6 +300,29 @@ function AdminUsersPage() {
           <Pagination page={page} pages={pages} total={total} size={size} onPageChange={setPage} />
         </div>
       )}
+
+      <ConfirmationModal
+        open={deleteTarget !== null}
+        title="Deactivate User"
+        message="Are you sure you want to deactivate this user?"
+        confirmLabel="Deactivate"
+        variant="danger"
+        onConfirm={handleDelete}
+        onCancel={() => setDeleteTarget(null)}
+      />
+
+      <ConfirmationModal
+        open={confirmToggleAdmin !== null}
+        title={confirmToggleAdmin?.role === "admin" ? "Remove Admin" : "Make Admin"}
+        message={confirmToggleAdmin?.role === "admin"
+          ? `Remove admin role from ${confirmToggleAdmin?.email}?`
+          : `Promote ${confirmToggleAdmin?.email} to admin?`}
+        confirmLabel={confirmToggleAdmin?.role === "admin" ? "Remove Admin" : "Make Admin"}
+        variant="primary"
+        loading={actionLoading === confirmToggleAdmin?.id}
+        onConfirm={handleToggleAdminWrapped}
+        onCancel={() => setConfirmToggleAdmin(null)}
+      />
     </div>
   );
 }
