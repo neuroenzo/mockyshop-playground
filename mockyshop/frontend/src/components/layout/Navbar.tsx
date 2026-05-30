@@ -12,6 +12,8 @@ export function Navbar() {
   const isAuthPage = pathname === "/login" || pathname === "/register";
   const [menuOpen, setMenuOpen] = useState(false);
 
+  if (!user && pathname === "/") return null;
+
   const closeMenu = () => setMenuOpen(false);
 
   return (

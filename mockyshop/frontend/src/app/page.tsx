@@ -3,23 +3,210 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { getProducts } from "@/lib/queries/products";
+import { register } from "@/lib/queries/auth";
 import type { Product } from "@/types/api";
+import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/contexts/ToastContext";
 import { ErrorMessage } from "@/components/ui/ErrorMessage";
 import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+import { Select } from "@/components/ui/Select";
 import { ProductCardSkeleton } from "@/components/ui/Skeleton";
 import { ProductImagePlaceholder } from "@/components/ui/ProductImagePlaceholder";
 
+type AuthMode = "login" | "register";
+
 export default function HomePage() {
+  const { user, loading: authLoading, login } = useAuth();
+  const { toast } = useToast();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const [authMode, setAuthMode] = useState<AuthMode>("login");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [role, setRole] = useState("buyer");
+  const [authError, setAuthError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+
   useEffect(() => {
+    if (!user) return;
     getProducts({ page: 1, size: 8 })
       .then((res) => setProducts(res.items))
       .catch((e) => setError(e.message ?? "Failed to load products"))
       .finally(() => setLoading(false));
-  }, []);
+  }, [user]);
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAuthError(null);
+    setSubmitting(true);
+    try {
+      await login(email, password);
+    } catch (err: unknown) {
+      setAuthError(err instanceof Error ? err.message : "Login failed");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAuthError(null);
+    setSubmitting(true);
+    try {
+      await register({ email, password, role: role as "buyer" | "seller" });
+      setEmail("");
+      setPassword("");
+      setRole("buyer");
+      setAuthMode("login");
+      toast("Account created! Log in to continue.", "success");
+    } catch (err: unknown) {
+      setAuthError(err instanceof Error ? err.message : "Registration failed");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  if (authLoading) {
+    return (
+      <div data-testid="home-page" className="flex justify-center py-20">
+        <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div
+        data-testid="home-page"
+        className="fixed inset-0 overflow-y-auto"
+        style={{ backgroundColor: "#ff0042" }}
+      >
+        <div className="min-h-screen flex flex-col items-center justify-center px-4 py-12 w-full max-w-md mx-auto">
+          <div className="text-center text-white mb-8">
+            <h1 className="text-4xl sm:text-5xl font-bold">Welcome to MockyShop</h1>
+            <p className="mt-3 text-lg text-white/80">
+              Browse products, add to cart, and place orders — your one-stop mock shop.
+            </p>
+          </div>
+
+          <div className="w-full bg-white rounded-xl shadow-xl p-6">
+            <div className="flex mb-6 bg-gray-lighter rounded-lg p-1">
+              <button
+                type="button"
+                onClick={() => { setAuthMode("login"); setAuthError(null); }}
+                className={`flex-1 py-2 text-sm font-medium rounded-md transition-colors ${
+                  authMode === "login"
+                    ? "bg-white text-gray-dark shadow-sm"
+                    : "text-gray-txt hover:text-gray-dark"
+                }`}
+                data-testid="tab-login"
+              >
+                Log In
+              </button>
+              <button
+                type="button"
+                onClick={() => { setAuthMode("register"); setAuthError(null); }}
+                className={`flex-1 py-2 text-sm font-medium rounded-md transition-colors ${
+                  authMode === "register"
+                    ? "bg-white text-gray-dark shadow-sm"
+                    : "text-gray-txt hover:text-gray-dark"
+                }`}
+                data-testid="tab-register"
+              >
+                Register
+              </button>
+            </div>
+
+            {authMode === "login" ? (
+              <form onSubmit={handleLogin} className="space-y-4">
+                {authError && <ErrorMessage message={authError} />}
+                <Input
+                  label="Email"
+                  name="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  placeholder="you@example.com"
+                />
+                <Input
+                  label="Password"
+                  name="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  placeholder="Enter your password"
+                />
+                <Button type="submit" loading={submitting} className="w-full" testId="btn-login-submit">
+                  Log In
+                </Button>
+                <p className="text-center text-sm text-gray-txt">
+                  Don&apos;t have an account?{" "}
+                  <button
+                    type="button"
+                    onClick={() => { setAuthMode("register"); setAuthError(null); }}
+                    className="text-primary hover:underline font-medium"
+                  >
+                    Register
+                  </button>
+                </p>
+              </form>
+            ) : (
+              <form onSubmit={handleRegister} className="space-y-4">
+                {authError && <ErrorMessage message={authError} />}
+                <Input
+                  label="Email"
+                  name="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  placeholder="you@example.com"
+                />
+                <Input
+                  label="Password"
+                  name="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  placeholder="Minimum 8 characters"
+                  minLength={8}
+                />
+                <Select
+                  label="Role"
+                  name="role"
+                  value={role}
+                  onChange={(e) => setRole(e.target.value)}
+                  options={[
+                    { value: "buyer", label: "Buyer" },
+                    { value: "seller", label: "Seller" },
+                  ]}
+                />
+                <Button type="submit" loading={submitting} className="w-full" testId="btn-register-submit">
+                  Create Account
+                </Button>
+                <p className="text-center text-sm text-gray-txt">
+                  Already have an account?{" "}
+                  <button
+                    type="button"
+                    onClick={() => { setAuthMode("login"); setAuthError(null); }}
+                    className="text-primary hover:underline font-medium"
+                  >
+                    Log in
+                  </button>
+                </p>
+              </form>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div data-testid="home-page">
@@ -29,13 +216,6 @@ export default function HomePage() {
           <p className="mt-3 text-lg text-white/80 max-w-xl">
             Browse products, add to cart, and place orders — your one-stop mock shop.
           </p>
-          <div className="mt-8 flex flex-wrap gap-4">
-            <Link href="/products">
-              <Button size="lg" className="bg-gray-lighter text-primary">
-                Browse Products
-              </Button>
-            </Link>
-          </div>
         </div>
         <div className="absolute -bottom-6 -right-6 h-48 w-48 rounded-full bg-white/10 sm:h-64 sm:w-64" />
         <div className="absolute -top-8 -right-8 h-24 w-24 rounded-full bg-white/10" />
