@@ -12,7 +12,7 @@ venv/
 env/
 
 # Environment files with secrets
-.env
+.env*
 
 # IDE
 .idea/
@@ -29,18 +29,35 @@ env/
 *.sqlite
 *.sqlite3
 
-# Uploaded files (dynamic content)
-backend/static/uploads/products/*
-!backend/static/uploads/products/.gitkeep
-
 # Node
-frontend/node_modules/
-frontend/.next/
-frontend/out/
+node_modules/
+.next/
+out/
 
 # Logs
 *.log
 
+# Uploaded files (dynamic content)
+mockyshop/backend/static/uploads/products/*
+!mockyshop/backend/static/uploads/products/.gitkeep
+
 # OS
 .DS_Store
 Thumbs.db
+
+# Tests
+.pytest_cache/
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+
+# Debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Vercel
+.vercel
+
