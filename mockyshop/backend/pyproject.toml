@@ -3,7 +3,7 @@ requires = ["setuptools>=64"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "fast-api-online-store"
+name = "mockyshop-playground"
 version = "0.1.0"
 description = "Add your description here"
 requires-python = ">=3.13"
