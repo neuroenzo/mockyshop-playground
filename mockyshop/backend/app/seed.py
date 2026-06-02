@@ -13,7 +13,7 @@ from app.models.users import User as UserModel
 
 
 async def seed_admin() -> None:
-    email = os.getenv("ADMIN_EMAIL", "admin@example.com")
+    email = os.getenv("ADMIN_EMAIL", "admin@shop.com")
     password = os.getenv("ADMIN_PASSWORD", "admin123")
 
     async with async_session_maker() as db:
