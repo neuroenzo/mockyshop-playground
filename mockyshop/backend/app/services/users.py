@@ -8,7 +8,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth import create_access_token, hash_password, verify_password
 from app.models.users import User as UserModel
-from app.schemas import UserCreate, UserFilter, UserPaginatedResponse, UserRoleUpdate, UserSortBy
+from app.schemas import (
+    UserCreate,
+    UserFilter,
+    UserPaginatedResponse,
+    UserRoleUpdate,
+    UserSortBy,
+    UserUpdate,
+)
 
 
 class UserService:
@@ -92,6 +99,34 @@ class UserService:
         )
 
         return {"access_token": access_token, "token_type": "bearer"}
+
+    async def update_user(self, user_id: int, data: UserUpdate) -> UserModel:
+        result = await self.db.scalars(select(UserModel).where(UserModel.id == user_id))
+        user = result.first()
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="User not found",
+            )
+
+        if data.email is not None:
+            existing = await self.db.scalar(
+                select(UserModel).where(UserModel.email == data.email, UserModel.id != user_id)
+            )
+            if existing:
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail="Email already in use",
+                )
+            user.email = data.email
+
+        if data.password is not None:
+            user.hashed_password = hash_password(data.password.get_secret_value())
+
+        await self.db.commit()
+        await self.db.refresh(user)
+
+        return user
 
     async def update_user_role(self, user_id: int, role_data: UserRoleUpdate) -> UserModel:
         result = await self.db.scalars(select(UserModel).where(UserModel.id == user_id))

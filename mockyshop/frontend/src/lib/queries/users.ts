@@ -1,5 +1,5 @@
 import { apiFetch } from "@/lib/api";
-import type { User, UserAdminCreate, UserFilter, UserPaginatedResponse, UserRoleUpdate } from "@/types/api";
+import type { User, UserAdminCreate, UserFilter, UserPaginatedResponse, UserUpdate, UserRoleUpdate } from "@/types/api";
 
 function buildQuery(filter: UserFilter): string {
   const params = new URLSearchParams();
@@ -19,6 +19,13 @@ export function getUsers(filter: UserFilter = {}): Promise<UserPaginatedResponse
 export function createUser(data: UserAdminCreate): Promise<User> {
   return apiFetch<User>("/admin/users/", {
     method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+export function updateUser(userId: number, data: UserUpdate): Promise<User> {
+  return apiFetch<User>(`/users/${userId}`, {
+    method: "PUT",
     body: JSON.stringify(data),
   });
 }
