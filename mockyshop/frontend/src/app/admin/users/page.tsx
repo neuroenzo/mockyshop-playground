@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback, useRef } from "react";
-import { getUsers, createUser, updateUserRole, makeAdmin, removeAdmin, deleteUser } from "@/lib/queries/users";
+import { getUsers, createUser, updateUser, updateUserRole, makeAdmin, removeAdmin, deleteUser } from "@/lib/queries/users";
 import type { User, UserAdminCreate, UserFilter } from "@/types/api";
 import { AuthGuard } from "@/components/layout/AuthGuard";
 import { useToast } from "@/contexts/ToastContext";
@@ -141,6 +141,39 @@ function AdminUsersPage() {
 
   const [confirmToggleAdmin, setConfirmToggleAdmin] = useState<User | null>(null);
 
+  // --- Edit modal ---
+  const [editTarget, setEditTarget] = useState<User | null>(null);
+  const [editEmail, setEditEmail] = useState("");
+  const [editPassword, setEditPassword] = useState("");
+  const [editSaving, setEditSaving] = useState(false);
+
+  const openEdit = useCallback((user: User) => {
+    setEditTarget(user);
+    setEditEmail(user.email);
+    setEditPassword("");
+  }, []);
+
+  const handleEdit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editTarget) return;
+    if (!editEmail.trim() && !editPassword.trim()) return;
+    setEditSaving(true);
+    try {
+      const data: { email?: string; password?: string } = {};
+      if (editEmail.trim() && editEmail.trim() !== editTarget.email) data.email = editEmail.trim();
+      if (editPassword.trim()) data.password = editPassword;
+      if (Object.keys(data).length === 0) { setEditTarget(null); return; }
+      await updateUser(editTarget.id, data);
+      toast("User updated", "success");
+      setEditTarget(null);
+      fetchUsers();
+    } catch (err: unknown) {
+      toast(err instanceof Error ? err.message : "Failed to update user", "error");
+    } finally {
+      setEditSaving(false);
+    }
+  };
+
   const handleToggleAdminWrapped = async () => {
     if (!confirmToggleAdmin) return;
     setActionLoading(confirmToggleAdmin.id);
@@ -275,6 +308,14 @@ function AdminUsersPage() {
                         data-testid={`actions-menu-${u.id}`}
                       >
                         <button
+                          onClick={() => { setOpenMenuId(null); setMenuPos(null); openEdit(u); }}
+                          disabled={actionLoading === u.id}
+                          className="block w-full text-left px-4 py-2 text-sm text-gray-txt hover:bg-gray-lighter disabled:opacity-50"
+                          data-testid={`btn-edit-user-${u.id}`}
+                        >
+                          Edit
+                        </button>
+                        <button
                           onClick={() => { setOpenMenuId(null); setMenuPos(null); setConfirmToggleAdmin(u); }}
                           disabled={actionLoading === u.id}
                           className="block w-full text-left px-4 py-2 text-sm text-gray-txt hover:bg-gray-lighter disabled:opacity-50"
@@ -310,6 +351,42 @@ function AdminUsersPage() {
         onConfirm={handleDelete}
         onCancel={() => setDeleteTarget(null)}
       />
+
+      {/* Edit modal */}
+      {editTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" data-testid="modal-edit-user">
+          <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
+            <h2 className="text-lg font-semibold mb-4">Edit User</h2>
+            <form onSubmit={handleEdit} className="space-y-4">
+              <Input
+                label="Email"
+                name="edit-email"
+                type="email"
+                value={editEmail}
+                onChange={(e) => setEditEmail(e.target.value)}
+                placeholder="user@example.com"
+              />
+              <Input
+                label="New Password (leave blank to keep current)"
+                name="edit-password"
+                type="password"
+                value={editPassword}
+                onChange={(e) => setEditPassword(e.target.value)}
+                placeholder="Minimum 8 characters"
+                minLength={8}
+              />
+              <div className="flex justify-end gap-3">
+                <Button type="button" variant="secondary" onClick={() => setEditTarget(null)}>
+                  Cancel
+                </Button>
+                <Button type="submit" loading={editSaving} testId="btn-save-user">
+                  Save
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       <ConfirmationModal
         open={confirmToggleAdmin !== null}

@@ -86,7 +86,7 @@ export default function HomePage() {
       >
         <div className="min-h-screen flex flex-col items-center justify-center px-4 py-12 w-full max-w-md mx-auto">
           <div className="text-center text-white mb-8">
-            <h1 className="text-4xl sm:text-5xl font-bold">Welcome to MockyShop</h1>
+            <h1 className="text-4xl sm:text-5xl font-bold" data-testid="welcome-title">Welcome to MockyShop</h1>
             <p className="mt-3 text-lg text-white/80">
               Browse products, add to cart, and place orders — your one-stop mock shop.
             </p>
@@ -212,7 +212,7 @@ export default function HomePage() {
     <div data-testid="home-page">
       <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-primary to-primary-hover text-white mb-12 px-8 py-12 sm:px-12 sm:py-16">
         <div className="relative z-10">
-          <h1 className="text-4xl sm:text-5xl font-bold">Welcome to MockyShop</h1>
+          <h1 className="text-4xl sm:text-5xl font-bold" data-testid="welcome-title">Welcome to MockyShop</h1>
           <p className="mt-3 text-lg text-white/80 max-w-xl">
             Browse products, add to cart, and place orders — your one-stop mock shop.
           </p>
