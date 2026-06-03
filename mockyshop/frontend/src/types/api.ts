@@ -29,6 +29,11 @@ export interface UserAdminCreate {
   role: "buyer" | "seller" | "admin";
 }
 
+export interface UserUpdate {
+  email?: string;
+  password?: string;
+}
+
 export interface UserRoleUpdate {
   role: "buyer" | "seller" | "admin";
 }

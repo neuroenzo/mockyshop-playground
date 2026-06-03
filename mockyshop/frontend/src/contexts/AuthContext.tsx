@@ -81,7 +81,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     removeToken();
     setUser(null);
     setTokenState(null);
-    router.push("/login");
+    router.push("/");
   }, [router]);
 
   const isRole = useCallback(

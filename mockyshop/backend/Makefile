@@ -14,3 +14,6 @@ fix:
 
 fix-unsafe:
 	uv run ruff check --fix --unsafe-fixes .
+
+e2e:
+	uv run pytest -v ../../tests/e2e -m e2e

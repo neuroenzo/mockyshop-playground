@@ -42,7 +42,7 @@ docker compose up -d --build
 
 After first startup, an admin user is auto-created (configurable via `ADMIN_EMAIL` / `ADMIN_PASSWORD` env vars):
 
-- **Email:** `admin@example.com`
+- **Email:** `admin@shop.com`
 - **Password:** `admin123`
 
 Register additional users (buyer/seller) at `/register`.
@@ -53,7 +53,7 @@ Register additional users (buyer/seller) at `/register`.
 |---|---|---|
 | `SECRET_KEY` | _(required)_ | JWT signing key (set in `backend/.env`) |
 | `DATABASE_URL` | `postgresql+asyncpg://postgres:password@db:5432/online_store` | DB connection |
-| `ADMIN_EMAIL` | `admin@example.com` | Auto-seeded admin email |
+| `ADMIN_EMAIL` | `admin@shop.com` | Auto-seeded admin email |
 | `ADMIN_PASSWORD` | `admin123` | Auto-seeded admin password |
 | `NEXT_PUBLIC_API_URL` | `""` (uses `/api` rewrite) | Override backend URL for dev |
 
@@ -105,6 +105,4 @@ docker compose logs -f frontend
 docker compose exec backend alembic upgrade head
 ```
 
-## License
 
-MIT

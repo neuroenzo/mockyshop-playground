@@ -33,6 +33,7 @@ from app.schemas.user import (
     UserPaginatedResponse,
     UserRoleUpdate,
     UserSortBy,
+    UserUpdate,
 )
 
 __all__ = [
@@ -70,4 +71,5 @@ __all__ = [
     "UserPaginatedResponse",
     "UserRoleUpdate",
     "UserSortBy",
+    "UserUpdate",
 ]

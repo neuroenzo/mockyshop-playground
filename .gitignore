@@ -7,9 +7,7 @@ build/
 *.egg
 
 # Virtual environment
-.venv/
-venv/
-env/
+mockyshop/backend/.venv
 
 # Environment files with secrets
 .env*
@@ -60,4 +58,5 @@ yarn-error.log*
 
 # Vercel
 .vercel
+
 

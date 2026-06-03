@@ -33,6 +33,13 @@ class User(UserBase):
     model_config = ConfigDict(from_attributes=True)
 
 
+class UserUpdate(BaseModel):
+    email: EmailStr | None = None
+    password: SecretStr | None = Field(
+        default=None, min_length=8, description="New password (minimum 8 characters)"
+    )
+
+
 class UserRoleUpdate(BaseModel):
     role: str = Field(
         ...,

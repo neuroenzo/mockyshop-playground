@@ -6,14 +6,16 @@ from app.auth import get_current_admin_user, get_current_user
 from app.db_depends import get_async_db
 from app.models.users import User as UserModel
 from app.schemas import User as UserSchema
-from app.schemas import UserCreate, UserFilter, UserPaginatedResponse, UserRoleUpdate
+from app.schemas import UserCreate, UserFilter, UserPaginatedResponse, UserRoleUpdate, UserUpdate
 from app.services.users import UserService
 
 router = APIRouter(prefix="/users", tags=["users"])
 
 
 @router.post("/", response_model=UserSchema, status_code=status.HTTP_201_CREATED)
-@router.post("", response_model=UserSchema, status_code=status.HTTP_201_CREATED, include_in_schema=False)
+@router.post(
+    "", response_model=UserSchema, status_code=status.HTTP_201_CREATED, include_in_schema=False
+)
 async def create_user(
     user: UserCreate,
     db: AsyncSession = Depends(get_async_db),
@@ -64,6 +66,21 @@ async def login(
     service = UserService(db)
 
     return await service.login(form_data)
+
+
+@router.put("/{user_id}", response_model=UserSchema)
+async def update_user(
+    user_id: int,
+    data: UserUpdate,
+    db: AsyncSession = Depends(get_async_db),
+    admin: UserModel = Depends(get_current_admin_user),
+):
+    """
+    Updates user email and/or password. Admin only.
+    """
+    service = UserService(db)
+
+    return await service.update_user(user_id, data)
 
 
 @router.patch("/{user_id}/role", response_model=UserSchema)
