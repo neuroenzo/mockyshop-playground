@@ -105,6 +105,4 @@ docker compose logs -f frontend
 docker compose exec backend alembic upgrade head
 ```
 
-## License
 
-MIT
