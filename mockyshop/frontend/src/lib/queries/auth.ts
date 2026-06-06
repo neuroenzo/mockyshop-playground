@@ -11,7 +11,7 @@ export function login(data: LoginRequest): Promise<TokenResponse> {
     username: data.username,
     password: data.password,
   });
-  return apiFetch<TokenResponse>("/users/token", {
+  return apiFetch<TokenResponse>("/users/login", {
     method: "POST",
     body,
     headers: {

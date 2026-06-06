@@ -29,7 +29,7 @@ pwd_context = PasswordHasher(
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="users/token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="users/login")
 
 
 def hash_password(password: str) -> str:

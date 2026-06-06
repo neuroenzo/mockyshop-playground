@@ -1,7 +1,9 @@
 import re
 
-from pages.base_page import BasePage
 from playwright.sync_api import Page, expect
+
+from pages.base_page import BasePage
+
 
 
 class LoginPage(BasePage):
@@ -12,7 +14,6 @@ class LoginPage(BasePage):
         self.password_input = page.get_by_test_id('input-password')
         self.login_button = page.get_by_test_id('btn-login-submit')
         self.welcome_title = page.get_by_test_id('welcome-title')
-
 
     def check_welcome_title(self):
         expect(self.welcome_title).to_be_visible()
