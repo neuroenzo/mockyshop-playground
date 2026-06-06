@@ -11,8 +11,8 @@ class AuthConfig(BaseSettings):
     buyer_password: SecretStr
     seller_email: str
     seller_password: SecretStr
-    shop_url: str
-    host: str = "localhost"
-    port: int = 3003
+    shop_url: str = "localhost:3003"
+    api_url: str = "localhost:8000"
+    url_schema: str = 'http'
 
     model_config = SettingsConfigDict(env_file=Path(__file__).parent / ".env")
