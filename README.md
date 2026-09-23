@@ -1,108 +1,194 @@
-## MockyShop
+### MockyShop Test Playground
 
-Full-stack e-commerce demo application.
+MockyShop is a playground for designing, running, and evolving automated tests.
 
-Full-stack e-commerce demo: Next.js 16 (App Router) + FastAPI + PostgreSQL + Docker.
+MockyShop is the **system under test**, not the main product. It provides a
+realistic UI, REST API, database, authentication, user roles, and multi-step business flows so
+that different testing approaches can be practised in one reproducible environment.
 
-### Tech Stack
+### What This Repository Is For
+
+Use this project to experiment with:
+
+- end-to-end UI tests with pytest and Playwright;
+- API and integration tests;
+- test architecture, fixtures, Page Objects, and test-data management;
+- reports and failure artifacts with Allure;
+- load and performance tests;
+- accessibility checks;
+- CI pipelines and isolated test environments.
+
+The test suite is intentionally expected to grow. The current implementation covers
+authorization scenarios with UI and API-assisted e2e tests. Planned areas are listed in
+[`tests/ROADMAP.md`](tests/ROADMAP.md).
+
+### System Under Test
+
+The test environment is a small e-commerce application with enough behaviour for realistic
+automation scenarios:
+
+- buyer, seller, and administrator roles;
+- registration and JWT authentication;
+- product catalogue, search, filters, and pagination;
+- product and category management;
+- shopping cart, orders, payment, and delivery statuses;
+- image uploads and role-based access control.
+
+The application stack is:
 
 | Layer | Technology |
 |---|---|
-| Frontend | Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS v4 |
-| Backend | Python 3.13, FastAPI, SQLAlchemy 2.0 (async), Alembic |
+| Test automation | pytest, Playwright, Allure |
+| Frontend | Next.js 16, React 19, TypeScript, Tailwind CSS 4 |
+| Backend | Python 3.13, FastAPI, async SQLAlchemy 2, Alembic |
 | Database | PostgreSQL 18 |
-| Auth | JWT (bcrypt), OAuth2 password flow |
-| Infra | Docker Compose, Nginx |
+| Infrastructure | Docker Compose, Nginx |
+
+### Repository Structure
+
+```text
+.
+├── tests/
+│   ├── e2e/                 # Current pytest + Playwright test suite
+│   │   ├── components/      # Reusable UI components
+│   │   ├── fixtures/        # pytest fixtures
+│   │   ├── pages/           # Page Objects
+│   │   ├── support/         # API clients, services, and report helpers
+│   │   └── tests/           # Test scenarios
+│   └── ROADMAP.md           # Planned test types and infrastructure
+├── mockyshop/
+│   ├── frontend/            # Next.js system under test
+│   ├── backend/             # FastAPI system under test
+│   ├── nginx/               # Reverse-proxy configuration
+│   └── docker-compose.yml   # Complete local test environment
+└── allure-results/          # Generated test results (when enabled)
+```
 
 ### Quick Start
 
-```bash
-# 1. Clone
-git clone <repo-url>
-cd mockyshop-playground
+#### 1. Start the system under test
 
-# 2. Configure secrets (optional — defaults work for local dev)
+From the repository root:
+
+```bash
+cd mockyshop
 cp .env.example backend/.env
-# Edit backend/.env and set a random SECRET_KEY
-
-# 3. Start all services
 docker compose up -d --build
 ```
 
-### Ports
+The environment will be available at:
 
-| Port | Service | URL |
-|---|---|---|
-| `98` | Nginx (reverse proxy) | http://localhost:98 |
-| `3003` | Next.js (direct) | http://localhost:3003 |
-| `8000` | FastAPI (direct) | http://localhost:8000 |
-| `5434` | PostgreSQL (host) | `localhost:5434` |
+| Service | Address |
+|---|---|
+| Application through Nginx | <http://localhost:98> |
+| Frontend | <http://localhost:3003> |
+| API and Swagger UI | <http://localhost:8000/docs> |
+| PostgreSQL | `localhost:5434` |
 
-### Default Credentials
+#### 2. Install the test dependencies
 
-After first startup, an admin user is auto-created (configurable via `ADMIN_EMAIL` / `ADMIN_PASSWORD` env vars):
-
-- **Email:** `admin@shop.com`
-- **Password:** `admin123`
-
-Register additional users (buyer/seller) at `/register`.
-
-### Environment Variables
-
-| Variable | Default | Description |
-|---|---|---|
-| `SECRET_KEY` | _(required)_ | JWT signing key (set in `backend/.env`) |
-| `DATABASE_URL` | `postgresql+asyncpg://postgres:password@db:5432/online_store` | DB connection |
-| `ADMIN_EMAIL` | `admin@shop.com` | Auto-seeded admin email |
-| `ADMIN_PASSWORD` | `admin123` | Auto-seeded admin password |
-| `NEXT_PUBLIC_API_URL` | `""` (uses `/api` rewrite) | Override backend URL for dev |
-
-### Project Structure
-
-```
-├── backend/          # FastAPI app
-│   ├── app/
-│   │   ├── models/   # SQLAlchemy models
-│   │   ├── routers/  # API endpoints
-│   │   ├── services/ # Business logic
-│   │   └── schemas/  # Pydantic schemas
-│   ├── migrations/   # Alembic migrations
-│   └── Dockerfile
-├── frontend/         # Next.js app
-│   ├── src/
-│   │   ├── app/          # App Router pages
-│   │   ├── components/   # React components
-│   │   ├── contexts/     # Auth context
-│   │   ├── lib/          # API client, queries
-│   │   └── types/        # TypeScript types
-│   └── Dockerfile
-├── nginx/            # Nginx config
-└── docker-compose.yml
-```
-
-### Features
-
-- Browse products with search, filter, sort, pagination
-- Product detail page with multiple images
-- Shopping cart (add/remove/update qty)
-- Order flow: create → pay → ship → deliver
-- Role-based auth: buyer / seller / admin
-- Admin panel: user management, category CRUD
-- Seller panel: product CRUD with image upload
-- Responsive design (Tailwind CSS v4 / Tailstore theme)
-
-### Development
+The Python project uses [uv](https://docs.astral.sh/uv/):
 
 ```bash
-# Rebuild after changes
-docker compose up -d --build
-
-# View logs
-docker compose logs -f backend
-docker compose logs -f frontend
-
-# Apply new DB migrations (auto-run on startup)
-docker compose exec backend alembic upgrade head
+cd backend
+uv sync --group test --group e2e
+uv run playwright install chromium
 ```
 
+#### 3. Prepare test users
 
+The application automatically creates this administrator on first startup:
+
+```text
+admin@shop.com / admin123
+```
+
+The current e2e suite also expects the following users:
+
+```text
+buyer@shop.com  / buyer123
+seller@shop.com / seller123
+```
+
+Create them through the registration form at <http://localhost:3003> before the first test run.
+The expected addresses and passwords can be changed in `tests/e2e/.env`.
+
+#### 4. Run the tests
+
+From `mockyshop/backend`:
+
+```bash
+# All current e2e tests
+make e2e
+
+# The same command without Make
+uv run pytest -v ../../tests/e2e -m e2e
+
+# Run without a visible browser window
+uv run pytest -v ../../tests/e2e -m e2e --headless
+
+# Save Allure results
+uv run pytest -v ../../tests/e2e -m e2e --alluredir=../../allure-results
+```
+
+The pytest configuration runs browsers in headed mode by default. Pass `--headless` when running
+in CI or when the browser UI is not needed.
+
+### Test Configuration
+
+Test environment settings are stored in `tests/e2e/.env`:
+
+```dotenv
+SHOP_URL=localhost:3003
+API_URL=localhost:8000
+URL_SCHEMA=http://
+ADMIN_EMAIL=admin@shop.com
+ADMIN_PASSWORD=admin123
+BUYER_EMAIL=buyer@shop.com
+BUYER_PASSWORD=buyer123
+SELLER_EMAIL=seller@shop.com
+SELLER_PASSWORD=seller123
+```
+
+These credentials are intended only for the local test environment.
+
+### Managing the Test Environment
+
+Run these commands from `mockyshop`:
+
+```bash
+# Check container status
+docker compose ps
+
+# Follow application logs
+docker compose logs -f backend frontend
+
+# Rebuild after changing the system under test
+docker compose up -d --build
+
+# Stop the environment
+docker compose down
+```
+
+Database migrations and administrator seeding run automatically when the backend container
+starts.
+
+### Current Status and Next Steps
+
+Available now:
+
+- UI login tests for buyer, seller, and administrator roles;
+- authenticated browser sessions created through the API;
+- Page Object and reusable component layers;
+- screenshots and Playwright traces for failed tests;
+- Allure-compatible test results.
+
+Planned next:
+
+- broader API and integration coverage;
+- isolated test data and an ephemeral test database;
+- load and performance scenarios;
+- accessibility checks;
+- CI pipeline for lint, integration, and e2e stages.
+
+See [`tests/ROADMAP.md`](tests/ROADMAP.md) for the short roadmap.
